@@ -5,4 +5,4 @@ This database is alphabetically ordered.
 
 No versions will be deleted from here unless they have malware
 
-*Note:* The dependencies must be a link to a txt
+*Note:* The dependencies must be a link to a txt where the txt has all of the **links** to the dependencies of your library
