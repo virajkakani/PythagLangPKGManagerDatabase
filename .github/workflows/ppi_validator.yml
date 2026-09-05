@@ -1,0 +1,96 @@
+name: Enforce Pythag Package Interface (ppi) Specification Rules
+
+on:
+  pull_request:
+    paths:
+      - 'registry.tcsv' # Only run this security pass if the database changes!
+
+jobs:
+  validate-ppi-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Blocks
+        uses: actions/checkout@v4
+
+      - name: Assert Database Formatting Rules
+        run: |
+          echo "[ppi Security] Commencing deep validation checks on registry.tcsv..."
+          
+          # RULE 1: ABSOLUTELY ZERO RAW SPACES ALLOWED ANYWHERE
+          if grep -q " " registry.tcsv; then
+            echo "::error::Specification Violation: Raw spaces ' ' are strictly forbidden anywhere in the database file."
+            exit 1
+          fi
+
+          # RULE 2: ENFORCE RAW TCSV GEOMETRY
+          # A row can have 3 columns (no deps column provided) OR 4 columns (deps file link included).
+          # Columns must be wrapped in quotes and separated by commas, ending strictly with a TAB \t character.
+          while IFS= read -r line || [ -n "$line" ]; do
+            [[ -z "$line" ]] && continue # Skip empty lines safely
+            
+            # Pattern A: 3 Columns -> "name","version","links"\t
+            PATTERN_3_COL='^"[^"]+","[^"]+","[^"]+"\t$'
+            # Pattern B: 4 Columns -> "name","version","links","dependencies file"\t
+            PATTERN_4_COL='^"[^"]+","[^"]+","[^"]+","[^"]+"\t$'
+
+            if [[ ! "$line" =~ $PATTERN_3_COL ]] && [[ ! "$line" =~ $PATTERN_4_COL ]]; then
+              echo "::error::Specification Violation: Broken row structural geometry."
+              echo "Offending Line Layout: $line"
+              exit 1
+            fi
+
+            # RULE 3: BAN CONFUSING RESERVED KEYWORDS
+            # Strips the quotes and checks if any token matches the forbidden engine keywords
+            for token in $(echo "$line" | tr -d '"' | tr ',' ' ' | tr '\t' ' '); do
+              if [[ "$token" == "name" || "$token" == "version" || "$token" == "links" || "$token" == "dependencies file" ]]; then
+                echo "::error::Specification Violation: An entry field is using a banned keyword name ('$token') which will confuse the engine."
+                exit 1
+              fi
+            done
+            
+          done < registry.tcsv
+          
+          echo "[ppi Success] All file database rules validated perfectly!"
+
+      - name: Assert Dependency File Rules
+        run: |
+          echo "[ppi Security] Commencing cross-validation of external dependency files..."
+          
+          # Extract all 4th column contents (if they exist) to audit the remote txt files
+          # Loops through every row, finding the 4th column payload
+          while IFS= read -r line || [ -n "$line" ]; do
+            [[ -z "$line" ]] && continue
+            
+            # Use comma splitting to check if a 4th column exists
+            COLS_COUNT=$(echo "$line" | tr -cd ',' | wc -c)
+            if [ "$COLS_COUNT" -eq 3 ]; then
+              # Extract the 4th column and strip quotes/tabs
+              DEPS_URL=$(echo "$line" | cut -d',' -f4 | tr -d '"' | tr -d '\t')
+              
+              if [[ "$DEPS_URL" != "NONE" && -n "$DEPS_URL" ]]; then
+                echo "[ppi Audit] Validating remote dependency manifest link: $DEPS_URL"
+                
+                # Fetch the contents of the txt file silently into a temporary runner stream
+                DEPS_CONTENT=$(curl -sL "$DEPS_URL")
+                
+                # RULE 4 & 5: MUST CONTAIN ONLY DIRECT LINKS (NO NAMES, METADATA, OR STD HEADERS)
+                while read -r dep_line; do
+                  [[ -z "$dep_line" ]] && continue
+                  
+                  # Check if the line is a direct web path link
+                  if [[ ! "$dep_line" =~ ^https?:// ]]; then
+                    echo "::error::Specification Violation: Dependency file contains plain names or metadata ('$dep_line'). It must contain ONLY raw archive links."
+                    exit 1
+                  fi
+                  
+                  # Block any attempts to sneak common standard library header names or file types into the download streams
+                  if [[ "$dep_line" =~ iostream || "$dep_line" =~ cstdlib || "$dep_line" =~ vector || "$dep_line" =~ string ]]; then
+                    echo "::error::Specification Violation: Detected standard library header keyword paths inside your deps file. Standard headers are strictly forbidden."
+                    exit 1
+                  fi
+                done <<< "$DEPS_CONTENT"
+              fi
+            fi
+          done < registry.tcsv
+          
+          echo "[ppi Success] Complete security pass finalized! Pull request cleared."
