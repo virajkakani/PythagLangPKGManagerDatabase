@@ -10,3 +10,4 @@ No versions will be deleted from here unless they have malware
 * No entry may be named "name", "version", "links" or "dependencies file" or anything else that could confuse the engine.
 * No spaces allowed anywhere ("math", "v0.0.1" must become "math","v0.0.1").
 * Tabs (\t) must be between rows and commas should be between entries.
+* If you do not need an entry in each column, don't use it. However, you must use all columns except for the "Dependencies file" column
