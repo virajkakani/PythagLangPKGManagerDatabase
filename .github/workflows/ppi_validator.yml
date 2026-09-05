@@ -3,7 +3,7 @@ name: Enforce Pythag Package Interface (ppi) Specification Rules
 on:
   pull_request:
     paths:
-      - 'registry.tcsv' # Only run this security pass if the database changes!
+      - 'PythagLanguageLibs.tcsv' # Only run this security pass if the database changes!
 
 jobs:
   validate-ppi-database:
@@ -14,10 +14,10 @@ jobs:
 
       - name: Assert Database Formatting Rules
         run: |
-          echo "[ppi Security] Commencing deep validation checks on registry.tcsv..."
+          echo "[ppi Security] Commencing deep validation checks on PythagLanguageLibs.tcsv..."
           
           # RULE 1: ABSOLUTELY ZERO RAW SPACES ALLOWED ANYWHERE
-          if grep -q " " registry.tcsv; then
+          if grep -q " " PythagLanguageLibs.tcsv; then
             echo "::error::Specification Violation: Raw spaces ' ' are strictly forbidden anywhere in the database file."
             exit 1
           fi
@@ -48,7 +48,7 @@ jobs:
               fi
             done
             
-          done < registry.tcsv
+          done < PythagLanguageLibs.tcsv
           
           echo "[ppi Success] All file database rules validated perfectly!"
 
@@ -91,6 +91,6 @@ jobs:
                 done <<< "$DEPS_CONTENT"
               fi
             fi
-          done < registry.tcsv
+          done < PythagLanguageLibs.tcsv
           
           echo "[ppi Success] Complete security pass finalized! Pull request cleared."
