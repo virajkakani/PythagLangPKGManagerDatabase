@@ -8,5 +8,5 @@ No versions will be deleted from here unless they have malware
 ## Specifications for the row for your library:
 * The dependencies file must be a link to a txt where the txt has all of the links to the dependencies of your library. **Do not make this dependencies file have the names of the dependencies.**
 * No entry may be named "name", "version", "links" or "dependencies file" or anything else that could confuse the engine.
-* No spaces allowed anywhere ("math", "v0.0.1" should become "math","v0.0.1").
+* No spaces allowed anywhere ("math", "v0.0.1" must become "math","v0.0.1").
 * Tabs (\t) must be between rows and commas should be between entries.
