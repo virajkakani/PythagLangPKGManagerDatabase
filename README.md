@@ -10,4 +10,4 @@ No versions will be deleted from here unless they have malware
 * No entry may be named "name", "version", "links" or "dependencies file" or anything else that could confuse the engine.
 * No spaces allowed anywhere ("math", "v0.0.1" must become "math","v0.0.1").
 * Tabs (\t) must be between rows and commas should be between entries.
-* You must use all columns except for the "dependencies file" column, but you do not neccessarily need an entry for tht column. **Do not include any standard library headers in your deps file**
+* You must use all columns but if you do not have any dependencies which aren't from the standard lib, just put "__NONE". **Do not include any standard library headers in your deps file**
