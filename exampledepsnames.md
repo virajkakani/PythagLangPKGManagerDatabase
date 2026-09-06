@@ -1,1 +1,2 @@
+# Spec for depsnames.txt
 
