@@ -6,7 +6,8 @@ This database is alphabetically ordered based on the name of the .
 No versions will be deleted from here unless they have malware
 
 ## Specifications for the row for your library:
-* The dependencies file must be a link to a txt where the txt has all of the links to the dependencies of your library. Make sure **all** links to child and grandchild dependencies are written. **Do not make this dependencies file have the names of the dependencies or any other metadata.** (see exampledeps.md for more details)
+* The dependencies_file entry must be a link to a txt where the txt has all of the links to the dependencies of your library. Make sure **all** links to child and grandchild dependencies are written. **Do not make this dependencies file have the names of the dependencies or any other metadata** (see exampledeps.md for more details).
+* The deps_names_file entry must be a sequence of names of the libraries, separated by spaces (see examplesdepsnames.md for details)
 * No entry may be named "name", "version", "links", "dependencies_file", or "deps_names_file" or anything else that could confuse the engine.
 * No spaces allowed anywhere ("math", "v0.0.1" must become "math","v0.0.1").
 * Tabs (\t) must be between rows and commas should be between entries.
